@@ -1,0 +1,20 @@
+[Bắt đầu gọi: strategy.train(experience)]
+│
+├── 1. before_training_exp()  <─── (Gọi ở đây: Chuẩn bị dữ liệu/mô hình cho tác vụ mới)
+│
+├── [Vòng lặp Epoch: For epoch in range(epochs)]
+│   │
+│   └── [Vòng lặp Batch: For mini-batch in dataset]
+│       │
+│       ├── (Mô hình chạy Forward: tính Loss)
+│       ├── (Mô hình chạy Backward: loss.backward())
+│       │
+│       ├── 2. after_backward()  <─── (Gọi ở đây: Can thiệp/sửa đổi gradient vừa tính xong)
+│       │
+│       ├── 3. before_update()   <─── (Gọi ở đây: Kiểm tra/Xử lý gradient lần cuối trước khi tối ưu)
+│       │
+│       └── (Cập nhật trọng số: optimizer.step() và xóa gradient: optimizer.zero_grad())
+│
+└── 4. after_training_exp()   <─── (Gọi ở đây: Lưu trữ tri thức, dọn dẹp sau khi học xong tác vụ)
+│
+[Kết thúc tác vụ]

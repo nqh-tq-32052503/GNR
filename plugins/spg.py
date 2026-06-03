@@ -66,6 +66,7 @@ class SPG(nn.Module):
             grad_new = grad_prev + grad
 
             self.dict__idx_task__t__h[idx_task][t][name] = grad_new
+        torch.save(self.dict__idx_task__t__h, f"register_grad_at_{idx_task}.pt")
         # endfor
     # enddef
 
@@ -89,7 +90,7 @@ class SPG(nn.Module):
         # endfor
 
         self.history_mask = {idx_task: history.copy()}
-
+        torch.save(self.history_mask, f"history_mask_at_{idx_task}.pt")
         self.dict__idx_task__t__h.clear()
     # enddef
 
@@ -123,7 +124,8 @@ class SPG(nn.Module):
         tgt = self.target_module
 
         a_max = self.a_max(idx_task, tgt)
-
+        if a_max is not None:
+            torch.save(a_max, f"a_max_at_{idx_task}.pt")
         for n, p in tgt.named_parameters():
             if p.grad is None:
                 pass
