@@ -11,11 +11,12 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from avalanche.training.supervised import Naive
 from avalanche.evaluation.metrics import (forgetting_metrics, accuracy_metrics, bwt_metrics,
                                           loss_metrics)
-from avalanche.logging import InteractiveLogger
+from avalanche.logging import InteractiveLogger, JSONLogger
 from avalanche.training.plugins import EvaluationPlugin
 from plugins.customise_plugin import GetLr, MyEarlyStoppingPlugin
 from plugins.customise_logger import MyWandBLogger
 from plugins.gnr import GNRPlugin
+import json
 
 
 def run(args):
@@ -48,12 +49,14 @@ def run(args):
     )
     lr_scheduler_plugin = LRSchedulerPlugin(scheduler, metric="val_loss")
     interactive_logger = InteractiveLogger()
+    json_logger = JSONLogger(log_folder="results", filename="json_logger_outputs.json")
     eval_plugin = EvaluationPlugin(
         accuracy_metrics(epoch=True, experience=True, stream=True, trained_experience=True),
         loss_metrics(experience=True, stream=True),
         forgetting_metrics(experience=True, stream=True),
         loggers=[
             interactive_logger,
+            json_logger
         ],
         collect_all=True
     )
@@ -80,6 +83,9 @@ def run(args):
     strategy.train(train_stream, eval_streams=[test_stream])
     print(f"Starting evaluation with seed {args.seed}.")
     strategy.eval(test_stream)
+    all_metrics = eval_plugin.get_all_metrics()
+    with open("all_metrics.json", "w") as f:
+        json.dump(all_metrics, f, indent=4, ensure_ascii=False)
 
 
 def assign_plugin_hyperparameters(args):
